@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ben's Life Adventure</title>
+
+  <style>
+    :root {
+      --navy: #0b1f3a;
+      --blue: #1769aa;
+      --accent: #4db8ff;
+      --cream: #f8f4dc;
+      --text: #1d2733;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #dff2ff, #ffffff);
+      color: var(--text);
+      overflow-x: hidden;
+    }
+
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: rgba(11, 31, 58, 0.95);
+      padding: 16px 8%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 18px rgba(0,0,0,0.15);
+    }
+
+    nav h2 {
+      color: white;
+      letter-spacing: 1px;
+    }
+
+    nav a {
+      color: white;
+      text-decoration: none;
+      margin-left: 18px;
+      padding: 8px 12px;
+      border-radius: 20px;
+      transition: 0.25s ease;
+    }
+
+    nav a:hover {
+      background: var(--accent);
+      color: var(--navy);
+    }
+
+    .linkedin {
+      background: #0077b5;
+    }
+
+    .game-wrapper {
+      max-width: 1050px;
+      margin: 30px auto;
+      padding: 0 20px;
+      text-align: center;
+    }
+
+    h1 {
+      color: var(--navy);
+      font-size: 2.6rem;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      color: #667085;
+      margin-bottom: 20px;
+    }
+
+    .game-shell {
+      background: #10243f;
+      padding: 18px;
+      border-radius: 24px;
+      box-shadow: 0 18px 45px rgba(0,0,0,0.25);
+      position: relative;
+    }
+
+    #gameCanvas {
+      width: 100%;
+      max-width: 960px;
+      height: auto;
+      image-rendering: pixelated;
+      background: #9bd67d;
+      border: 5px solid #06172b;
+      border-radius: 12px;
+    }
+
+    .controls {
+      margin-top: 16px;
+      background: white;
+      padding: 16px;
+      border-radius: 18px;
+      text-align: left;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+    }
+
+    .controls strong {
+      color: var(--blue);
+    }
+
+    .dialogue {
+      position: absolute;
+      left: 40px;
+      right: 40px;
+      bottom: 40px;
+      background: rgba(255,255,255,0.96);
+      border: 4px solid #0b1f3a;
+      border-radius: 14px;
+      padding: 16px;
+      text-align: left;
+      display: none;
+      z-index: 10;
+      box-shadow: 0 8px 22px rgba(0,0,0,0.3);
+    }
+
+    .dialogue h3 {
+      color: var(--blue);
+      margin-bottom: 8px;
+    }
+
+    .dialogue button {
+      margin-top: 10px;
+      margin-right: 8px;
+      padding: 9px 13px;
+      border: none;
+      border-radius: 10px;
+      background: var(--blue);
+      color: white;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .dialogue button:hover {
+      background: var(--accent);
+      color: var(--navy);
+    }
+  </style>
+</head>
+
+<body>
+
+  <nav>
+    <h2>Benjamin Fowler</h2>
+    <div>
+      <a href="index.html">Resume</a>
+      <a href="hobbies.html">Hobbies</a>
+      <a href="game.html">Game</a>
+      <a href="https://www.linkedin.com/in/benjamin-fowler-838241249/"
+         target="_blank"
+         rel="noopener noreferrer"
+         class="linkedin">LinkedIn</a>
+    </div>
+  </nav>
+
+  <div class="game-wrapper">
+    <h1>Ben's Life Adventure</h1>
+    <p class="subtitle">A tiny pixel adventure about chores, family, work, trucks, and life points.</p>
+
+    <div class="game-shell">
+      <canvas id="gameCanvas" width="960" height="600"></canvas>
+
+      <div class="dialogue" id="dialogueBox">
+        <h3 id="dialogueTitle">Title</h3>
+        <p id="dialogueText">Dialogue text</p>
+        <div id="dialogueButtons"></div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <p><strong>Move:</strong> Arrow Keys or WASD</p>
+      <p><strong>Interact:</strong> Space Bar</p>
+      <p><strong>P:</strong> Punch &nbsp; <strong>O:</strong> Block &nbsp; <strong>K:</strong> Kick</p>
+      <p><strong>Goal:</strong> Reach 100 life points. Rest in bed to refill hearts.</p>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+
+    const dialogueBox = document.getElementById("dialogueBox");
+    const dialogueTitle = document.getElementById("dialogueTitle");
+    const dialogueText = document.getElementById("dialogueText");
+    const dialogueButtons = document.getElementById("dialogueButtons");
+
+    const keys = {};
+
+    let currentArea = "house";
+    let mode = "explore";
+    let message = "Welcome home. Find Danny, do chores, drive the truck, and gain life points.";
+    let messageTimer = 240;
+
+    const player = {
+      x: 450,
+      y: 320,
+      w: 24,
+      h: 32,
+      speed: 3,
+      hearts: 3,
+      maxHearts: 3,
+      life: 0,
+      hasBoatPlan: false,
+      dannyFollowing: false,
+      truckHookedBoat: false,
+      grandpaInvited: false,
+      inventory: ["Phone", "Keys"]
+    };
+
+    const areas = {
+      house: {
+        name: "Home Interior",
+        bg: "#c8b28b",
+        exits: [
+          { x: 430, y: 540, w: 100, h: 40, to: "farm", px: 450, py: 470, label: "Door to Farm" }
+        ],
+        objects: [
+          { type: "bed", x: 130, y: 120, w: 95, h: 70, label: "Bed" },
+          { type: "food", x: 690, y: 120, w: 85, h: 65, label: "Kitchen" },
+          { type: "workout", x: 690, y: 360, w: 100, h: 70, label: "Workout Area" },
+          { type: "danny", x: 350, y: 250, w: 32, h: 38, label: "Danny" },
+          { type: "phone", x: 110, y: 390, w: 55, h: 55, label: "Phone" }
+        ]
+      },
+
+      farm: {
+        name: "Home Farm",
+        bg: "#89c96b",
+        exits: [
+          { x: 445, y: 0, w: 80, h: 40, to: "house", px: 460, py: 480, label: "House" },
+          { x: 880, y: 250, w: 80, h: 80, to: "town", px: 70, py: 300, label: "Road to Town" },
+          { x: 30, y: 250, w: 80, h: 80, to: "woods", px: 800, py: 300, label: "Road to Woods" }
+        ],
+        objects: [
+          { type: "hay", x: 170, y: 280, w: 60, h: 50, label: "Hay Bale" },
+          { type: "cow", x: 170, y: 390, w: 45, h: 36, label: "Cow" },
+          { type: "horse", x: 260, y: 380, w: 50, h: 40, label: "Horse" },
+          { type: "wood", x: 650, y: 360, w: 70, h: 55, label: "Wood Pile" },
+          { type: "truck", x: 650, y: 170, w: 90, h: 55, label: "Ford F-150" },
+          { type: "boat", x: 760, y: 170, w: 80, h: 45, label: "Boat" },
+          { type: "shop", x: 665, y: 70, w: 120, h: 75, label: "Tool Shop" }
+        ]
+      },
+
+      town: {
+        name: "Mini Orofino",
+        bg: "#8fd3ff",
+        exits: [
+          { x: 0, y: 270, w: 50, h: 70, to: "farm", px: 810, py: 285, label: "Road Home" },
+          { x: 910, y: 100, w: 50, h: 70, to: "work", px: 80, py: 300, label: "Road to Work" },
+          { x: 910, y: 430, w: 50, h: 70, to: "lake", px: 90, py: 300, label: "Road to Lake" },
+          { x: 440, y: 0, w: 90, h: 40, to: "byu", px: 450, py: 500, label: "Road to BYU" }
+        ],
+        objects: [
+          { type: "church", x: 130, y: 90, w: 130, h: 95, label: "Church" },
+          { type: "grandma", x: 275, y: 135, w: 30, h: 38, label: "Grandma" },
+          { type: "store", x: 400, y: 100, w: 130, h: 90, label: "Grocery Store" },
+          { type: "court", x: 650, y: 100, w: 130, h: 90, label: "Courthouse" },
+          { type: "cop", x: 540, y: 360, w: 32, h: 38, label: "Cop" }
+        ]
+      },
+
+      work: {
+        name: "House Building Site",
+        bg: "#d8b06b",
+        exits: [
+          { x: 0, y: 275, w: 50, h: 70, to: "town", px: 830, py: 130, label: "Back to Town" }
+        ],
+        objects: [
+          { type: "dig", x: 150, y: 160, w: 130, h: 80, label: "Excavator Digging" },
+          { type: "concrete", x: 400, y: 160, w: 130, h: 80, label: "Concrete Pour" },
+          { type: "frame", x: 650, y: 160, w: 130, h: 80, label: "Frame Walls" },
+          { type: "sheath", x: 400, y: 370, w: 130, h: 80, label: "Nail Sheathing" }
+        ]
+      },
+
+      lake: {
+        name: "The Lake",
+        bg: "#4db8ff",
+        exits: [
+          { x: 0, y: 280, w: 50, h: 70, to: "town", px: 820, py: 450, label: "Road to Town" }
+        ],
+        objects: [
+          { type: "lakeboat", x: 420, y: 290, w: 105, h: 55, label: "Boat" },
+          { type: "tube", x: 560, y: 330, w: 65, h: 40, label: "Tube" },
+          { type: "grandpaLake", x: 660, y: 260, w: 32, h: 38, label: "Grandpa" }
+        ]
+      },
+
+      byu: {
+        name: "BYU Provo",
+        bg: "#a7d7ff",
+        exits: [
+          { x: 440, y: 550, w: 90, h: 50, to: "town", px: 450, py: 70, label: "Back to Town" }
+        ],
+        objects: [
+          { type: "byuSign", x: 390, y: 220, w: 180, h: 90, label: "BYU Campus" }
+        ]
+      },
+
+      woods: {
+        name: "The Woods",
+        bg: "#326b3f",
+        exits: [
+          { x: 875, y: 270, w: 70, h: 70, to: "farm", px: 120, py: 285, label: "Back to Farm" }
+        ],
+        objects: [
+          { type: "treeChop", x: 350, y: 260, w: 80, h: 95, label: "Chop Wood" }
+        ]
+      }
+    };
+
+    const miniGame = {
+      active: false,
+      type: "",
+      timer: 0,
+      progress: 0,
+      enemyHealth: 100,
+      playerHealth: 100,
+      note: ""
+    };
+
+    window.addEventListener("keydown", e => {
+      keys[e.key.toLowerCase()] = true;
+
+      if (e.key === " ") {
+        e.preventDefault();
+        interact();
+      }
+
+      if (e.key.toLowerCase() === "p") actionMove("punch");
+      if (e.key.toLowerCase() === "o") actionMove("block");
+      if (e.key.toLowerCase() === "k") actionMove("kick");
+    });
+
+    window.addEventListener("keyup", e => {
+      keys[e.key.toLowerCase()] = false;
+    });
+
+    function rectsTouch(a, b) {
+      return a.x < b.x + b.w &&
+             a.x + a.w > b.x &&
+             a.y < b.y + b.h &&
+             a.y + a.h > b.y;
+    }
+
+    function showMessage(text) {
+      message = text;
+      messageTimer = 260;
+    }
+
+    function openDialogue(title, text, buttons) {
+      mode = "dialogue";
+      dialogueTitle.textContent = title;
+      dialogueText.textContent = text;
+      dialogueButtons.innerHTML = "";
+
+      buttons.forEach(btn => {
+        const button = document.createElement("button");
+        button.textContent = btn.text;
+        button.onclick = btn.action;
+        dialogueButtons.appendChild(button);
+      });
+
+      dialogueBox.style.display = "block";
+    }
+
+    function closeDialogue() {
+      mode = "explore";
+      dialogueBox.style.display = "none";
+    }
+
+    function addLife(points, reason) {
+      player.life += points;
+      if (player.life > 100) player.life = 100;
+      showMessage(`+${points} life points: ${reason}`);
+
+      if (player.life >= 100) {
+        openDialogue(
+          "Opportunity Unlocked",
+          "You reached 100 life points. New roads in life are opening up: college, marriage, career, and adventure.",
+          [{ text: "Epic.", action: closeDialogue }]
+        );
+      }
+    }
+
+    function loseHeart(reason) {
+      player.hearts -= 1;
+      if (player.hearts < 0) player.hearts = 0;
+      showMessage(`Ouch. ${reason}`);
+
+      if (player.hearts <= 0) {
+        player.hearts = 1;
+        currentArea = "house";
+        player.x = 170;
+        player.y = 170;
+        showMessage("You got wrecked and woke up back home with 1 heart.");
+      }
+    }
+
+    function interact() {
+      if (mode !== "explore") return;
+
+      const area = areas[currentArea];
+      const playerBox = { x: player.x - 8, y: player.y - 8, w: player.w + 16, h: player.h + 16 };
+
+      for (const exit of area.exits) {
+        if (rectsTouch(playerBox, exit)) {
+          currentArea = exit.to;
+          player.x = exit.px;
+          player.y = exit.py;
+          showMessage(`Traveled to ${areas[currentArea].name}.`);
+          return;
+        }
+      }
+
+      for (const obj of area.objects) {
+        if (rectsTouch(playerBox, obj)) {
+          handleObject(obj);
+          return;
+        }
+      }
+
+      showMessage("Nothing to interact with here.");
+    }
+
+    function handleObject(obj) {
+      switch (obj.type) {
+        case "bed":
+          player.hearts = player.maxHearts;
+          showMessage("You rested in bed. Hearts fully restored.");
+          break;
+
+        case "food":
+          addLife(3, "made and ate real food instead of surviving on snacks");
+          break;
+
+        case "workout":
+          addLife(4, "worked out like a future legend");
+          break;
+
+        case "phone":
+          openPhone();
+          break;
+
+        case "danny":
+          openDialogue(
+            "Danny",
+            "Hey ugly kid.",
+            [
+              {
+                text: "Laugh about it",
+                action: () => {
+                  closeDialogue();
+                  openDialogue(
+                    "Danny",
+                    "Wanna go boating?",
+                    [
+                      {
+                        text: "Absolutely",
+                        action: () => {
+                          player.hasBoatPlan = true;
+                          player.dannyFollowing = true;
+                          closeDialogue();
+                          showMessage("Danny is following you. Back the truck up to the boat by the shop.");
+                        }
+                      },
+                      { text: "Maybe later", action: closeDialogue }
+                    ]
+                  );
+                }
+              },
+              {
+                text: "Shut up",
+                action: () => {
+                  closeDialogue();
+                  startDannyFight();
+                }
+              }
+            ]
+          );
+          break;
+
+        case "truck":
+          if (player.hasBoatPlan && !player.truckHookedBoat) {
+            player.truckHookedBoat = true;
+            addLife(5, "hooked up the boat with Danny");
+          } else {
+            openDialogue(
+              "Ford F-150",
+              "The mighty farm truck. Roads lead to town, woods, work, lake, and eventually bigger dreams.",
+              [{ text: "Drive on.", action: closeDialogue }]
+            );
+          }
+          break;
+
+        case "hay":
+          addLife(4, "moved hay to feed the animals");
+          break;
+
+        case "cow":
+          addLife(2, "fed the cows");
+          break;
+
+        case "horse":
+          addLife(2, "fed the horses");
+          break;
+
+        case "wood":
+        case "treeChop":
+          startWorkMini("wood", "Chop Wood", "Tap SPACE quickly to chop enough wood before time runs out.");
+          break;
+
+        case "shop":
+          openDialogue(
+            "Tool Shop",
+            "The shop smells like lumber, oil, and unfinished projects. Beautiful.",
+            [{ text: "Respect.", action: closeDialogue }]
+          );
+          break;
+
+        case "church":
+          addLife(10, "went to church and learned about Jesus");
+          break;
+
+        case "grandma":
+          addLife(10, "hugged Grandma at church");
+          break;
+
+        case "store":
+          openDialogue(
+            "Grocery Store",
+            "Do you buy groceries like a responsible citizen or steal them like a raccoon in boots?",
+            [
+              { text: "Buy groceries", action: () => { closeDialogue(); addLife(5, "bought groceries"); } },
+              { text: "Steal groceries", action: () => { closeDialogue(); loseHeart("The cops are mad and you got a ticket."); } }
+            ]
+          );
+          break;
+
+        case "court":
+          addLife(6, "attended jury duty like a responsible adult");
+          break;
+
+        case "cop":
+          openDialogue(
+            "Officer",
+            "Everything alright, cowboy?",
+            [
+              { text: "Yes sir", action: () => { closeDialogue(); addLife(2, "showed respect to the law"); } },
+              { text: "Punch", action: () => { closeDialogue(); loseHeart("Bad idea. You got ticketed immediately."); } }
+            ]
+          );
+          break;
+
+        case "dig":
+          startWorkMini("dig", "Excavator Digging", "Tap SPACE to dig the foundation cleanly.");
+          break;
+
+        case "concrete":
+          startWorkMini("concrete", "Concrete Pour", "Tap SPACE to pour and finish the footers and walls.");
+          break;
+
+        case "frame":
+          startWorkMini("frame", "Framing Walls", "Tap SPACE to stand walls before the crew starts roasting you.");
+          break;
+
+        case "sheath":
+          startWorkMini("sheath", "Nailing Sheathing", "Tap SPACE to nail sheathing like a pro.");
+          break;
+
+        case "lakeboat":
+          if (player.truckHookedBoat) {
+            addLife(10, "went boating with Danny");
+          } else {
+            showMessage("You need to hook the boat to the truck back at the farm first.");
+          }
+          break;
+
+        case "tube":
+          addLife(5, "survived tubing without becoming lake pizza");
+          break;
+
+        case "grandpaLake":
+          if (player.grandpaInvited) {
+            addLife(10, "spent time at the lake with Grandpa");
+          } else {
+            showMessage("Grandpa is here in spirit. Invite him with your phone next time.");
+          }
+          break;
+
+        case "byuSign":
+          openDialogue(
+            "BYU Provo",
+            "Campus is under construction for Version 2. For now, you can feel the stress of homework approaching.",
+            [{ text: "I feel it.", action: closeDialogue }]
+          );
+          break;
+      }
+    }
+
+    function openPhone() {
+      openDialogue(
+        "Phone",
+        "Who do you want to call?",
+        [
+          {
+            text: "Call Grandpa",
+            action: () => {
+              player.grandpaInvited = true;
+              closeDialogue();
+              showMessage("Grandpa said he will meet you at the lake.");
+            }
+          },
+          {
+            text: "Call Family",
+            action: () => {
+              closeDialogue();
+              addLife(5, "called family just to check in");
+            }
+          },
+          { text: "Put phone away", action: closeDialogue }
+        ]
+      );
+    }
+
+    function startDannyFight() {
+      mode = "fight";
+      miniGame.active = true;
+      miniGame.type = "dannyFight";
+      miniGame.enemyHealth = 100;
+      miniGame.playerHealth = 100;
+      miniGame.note = "Danny has entered Little Mac mode. P = punch, O = block, K = kick.";
+    }
+
+    function startWorkMini(type, title, text) {
+      mode = "workMini";
+      miniGame.active = true;
+      miniGame.type = type;
+      miniGame.timer = 360;
+      miniGame.progress = 0;
+
+      openDialogue(
+        title,
+        text,
+        [
+          {
+            text: "Start",
+            action: () => {
+              dialogueBox.style.display = "none";
+              mode = "workMini";
+            }
+          }
+        ]
+      );
+    }
+
+    function actionMove(action) {
+      if (mode === "fight") {
+        if (action === "punch") {
+          miniGame.enemyHealth -= 13;
+          miniGame.playerHealth -= 4;
+          miniGame.note = "Ben throws a punch. Danny flexes emotionally.";
+        }
+
+        if (action === "kick") {
+          miniGame.enemyHealth -= 18;
+          miniGame.playerHealth -= 8;
+          miniGame.note = "Cowboy boot kick. Highly questionable. Very effective.";
+        }
+
+        if (action === "block") {
+          miniGame.playerHealth += 8;
+          if (miniGame.playerHealth > 100) miniGame.playerHealth = 100;
+          miniGame.note = "Ben blocks. Danny respects the defense.";
+        }
+
+        if (miniGame.enemyHealth <= 0) {
+          mode = "explore";
+          miniGame.active = false;
+          addLife(10, "beat Danny in the brother battle");
+        }
+
+        if (miniGame.playerHealth <= 0) {
+          mode = "explore";
+          miniGame.active = false;
+          loseHeart("Danny won the fight.");
+        }
+      } else if (mode === "explore") {
+        showMessage(`Ben used ${action}. It looked pretty cool.`);
+      }
+    }
+
+    function update() {
+      if (mode === "explore") {
+        let dx = 0;
+        let dy = 0;
+
+        if (keys["arrowup"] || keys["w"]) dy -= player.speed;
+        if (keys["arrowdown"] || keys["s"]) dy += player.speed;
+        if (keys["arrowleft"] || keys["a"]) dx -= player.speed;
+        if (keys["arrowright"] || keys["d"]) dx += player.speed;
+
+        player.x += dx;
+        player.y += dy;
+
+        player.x = Math.max(10, Math.min(canvas.width - player.w - 10, player.x));
+        player.y = Math.max(50, Math.min(canvas.height - player.h - 10, player.y));
+      }
+
+      if (mode === "workMini") {
+        miniGame.timer--;
+
+        if (keys[" "]) {
+          miniGame.progress += 1.8;
+        }
+
+        if (miniGame.progress >= 100) {
+          mode = "explore";
+          miniGame.active = false;
+          addLife(8, "completed a work challenge");
+        }
+
+        if (miniGame.timer <= 0 && miniGame.progress < 100) {
+          mode = "explore";
+          miniGame.active = false;
+          loseHeart("The job went sideways.");
+        }
+      }
+
+      if (messageTimer > 0) messageTimer--;
+    }
+
+    function drawPixelRect(x, y, w, h, color) {
+      ctx.fillStyle = color;
+      ctx.fillRect(Math.round(x), Math.round(y), w, h);
+    }
+
+    function drawArea() {
+      const area = areas[currentArea];
+      ctx.fillStyle = area.bg;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      drawPattern();
+
+      area.exits.forEach(exit => {
+        drawPixelRect(exit.x, exit.y, exit.w, exit.h, "#6b4f2a");
+        drawText(exit.label, exit.x + 5, exit.y + exit.h + 16, "#fff");
+      });
+
+      area.objects.forEach(obj => drawObject(obj));
+    }
+
+    function drawPattern() {
+      if (currentArea === "farm") {
+        drawPixelRect(0, 250, 960, 95, "#8b6f47");
+        drawPixelRect(80, 70, 180, 120, "#8a4f2a");
+        drawText("House", 125, 135, "white");
+        drawPixelRect(610, 45, 220, 115, "#74512d");
+        drawText("Tool Shop", 675, 110, "white");
+      }
+
+      if (currentArea === "house") {
+        drawPixelRect(80, 80, 800, 440, "#d9c49a");
+        drawPixelRect(430, 540, 100, 40, "#6b4f2a");
+      }
+
+      if (currentArea === "town") {
+        drawPixelRect(0, 280, 960, 70, "#737373");
+        drawPixelRect(430, 0, 90, 600, "#737373");
+      }
+
+      if (currentArea === "work") {
+        drawPixelRect(90, 90, 780, 390, "#b98245");
+        drawPixelRect(260, 300, 450, 120, "#7b5a3a");
+        drawText("Foundation Zone", 395, 365, "white");
+      }
+
+      if (currentArea === "lake") {
+        drawPixelRect(0, 470, 960, 130, "#e4c16f");
+        drawPixelRect(0, 0, 960, 470, "#409de0");
+      }
+
+      if (currentArea === "byu") {
+        drawPixelRect(340, 180, 290, 180, "#d9d9d9");
+        drawText("BYU", 448, 280, "#0b1f3a");
+      }
+
+      if (currentArea === "woods") {
+        for (let i = 0; i < 16; i++) {
+          drawPixelRect(60 + i * 55, 80 + (i % 3) * 90, 30, 70, "#5a351d");
+          drawPixelRect(42 + i * 55, 45 + (i % 3) * 90, 66, 55, "#1e5f34");
+        }
+      }
+    }
+
+    function drawObject(obj) {
+      switch (obj.type) {
+        case "bed":
+          drawPixelRect(obj.x, obj.y, obj.w, obj.h, "#4d79ff");
+          drawText("Bed", obj.x + 25, obj.y + 42, "white");
+          break;
+
+        case "food":
+          drawPixelRect(obj.x, obj.y, obj.w, obj.h, "#d96c35");
+          drawText("Kitchen", obj.x + 12, obj.y + 38, "white");
+          break;
+
+        case "workout":
+          drawPixelRect(obj.x, obj.y, obj.w, obj.h, "#444");
+          drawText("Weights", obj.x + 15, obj.y + 40, "white");
+          break;
+
+        case "danny":
+          drawDanny(obj.x, obj.y);
+          break;
+
+        case "phone":
+          drawPixelRect(obj.x, obj.y, obj.w, obj.h, "#101820");
+          drawText("Phone", obj.x + 5, obj.y + 34, "#4db8ff");
+          break;
+
+        case "truck":
+          drawTruck(obj.x, obj.y);
+          break;
+
+        case "boat":
+        case "lakeboat":
+          drawBoat(obj.x, obj.y);
+          break;
+
+        case "hay":
+          drawPixelRect(obj.x, obj.y, obj.w, obj.h, "#d8aa2b");
+          drawText("Hay", obj.x + 15, obj.y + 32, "#402c00");
+          break;
+
+        case "cow":
+          drawPixelRect(obj.x, obj.y, obj.w, obj.h, "#fff");
+          drawPixelRect(obj.x + 8, obj.y + 8, 12, 12, "#111");
+          drawText("Cow", obj.x, obj.y - 5, "white");
+          break;
+
+        case "horse":
+          drawPixelRect(obj.x, obj.y, obj.w, obj.h, "#7b4b2a");
+          drawText("Horse", obj.x, obj.y - 5, "white");
+          break;
+
+        case "wood":
+        case "treeChop":
+          drawPixelRect(obj.x, obj.y, obj.w, obj.h, "#7b4b2a");
+          drawText("Wood", obj.x + 12, obj.y + 34, "white");
+          break;
+
+        case "shop":
+          drawPixelRect(obj.x, obj.y, obj.w, obj.h, "#6a4225");
+          drawText("Shop", obj.x + 35, obj.y + 42, "white");
+          break;
+
+        case "church":
+          drawPixelRect(obj.x, obj.y, obj.w, obj.h, "#f5f5f5");
+          drawPixelRect(obj.x + 52, obj.y - 45, 28, 45, "#f5f5f5");
+          drawText("Church", obj.x + 35, obj.y + 55, "#0b1f3a");
+          break;
+
+        case "grandma":
+        case "grandpaLake":
+          drawPixelRect(obj.x, obj.y, obj.w, obj.h, "#8d6e63");
+          drawText(obj.type === "grandma" ? "Grandma" : "Grandpa", obj.x - 15, obj.y - 6, "white");
+          break;
+
+        case "store":
+          drawPixelRect(obj.x, obj.y, obj.w, obj.h, "#e76f51");
+          drawText("Store", obj.x + 40, obj.y + 50, "white");
+          break;
+
+        case "court":
+          drawPixelRect(obj.x, obj.y, obj.w, obj.h, "#c9c9c9");
+          drawText("Court", obj.x + 42, obj.y + 50, "#0b1f3a");
+          break;
+
+        case "cop":
+          drawPixelRect(obj.x, obj.y, obj.w, obj.h, "#123c69");
+          drawText("Cop", obj.x - 2, obj.y - 7, "white");
+          break;
+
+        case "dig":
+          drawPixelRect(obj.x, obj.y, obj.w, obj.h, "#f4a261");
+          drawText("Dig", obj.x + 48, obj.y + 45, "#111");
+          break;
+
+        case "concrete":
+          drawPixelRect(obj.x, obj.y, obj.w, obj.h, "#bfc0c0");
+          drawText("Concrete", obj.x + 28, obj.y + 45, "#111");
+          break;
+
+        case "frame":
+          drawPixelRect(obj.x, obj.y, obj.w, obj.h, "#b57f50");
+          drawText("Frame", obj.x + 40, obj.y + 45, "white");
+          break;
+
+        case "sheath":
+          drawPixelRect(obj.x, obj.y, obj.w, obj.h, "#c08457");
+          drawText("Sheath", obj.x + 38, obj.y + 45, "white");
+          break;
+
+        case "tube":
+          drawPixelRect(obj.x, obj.y, obj.w, obj.h, "#ff4d6d");
+          drawText("Tube", obj.x + 12, obj.y + 25, "white");
+          break;
+
+        case "byuSign":
+          drawPixelRect(obj.x, obj.y, obj.w, obj.h, "#0b1f3a");
+          drawText("Future BYU Zone", obj.x + 25, obj.y + 52, "white");
+          break;
+      }
+    }
+
+    function drawPlayer() {
+      drawPixelRect(player.x + 6, player.y, 12, 7, "#111");
+      drawPixelRect(player.x + 5, player.y + 7, 14, 8, "#f1c27d");
+      drawPixelRect(player.x + 3, player.y + 15, 18, 12, "#c0392b");
+      drawPixelRect(player.x + 5, player.y + 27, 7, 12, "#24527a");
+      drawPixelRect(player.x + 13, player.y + 27, 7, 12, "#24527a");
+      drawPixelRect(player.x + 3, player.y + 38, 8, 5, "#3b2414");
+      drawPixelRect(player.x + 13, player.y + 38, 8, 5, "#3b2414");
+
+      drawText("Ben", player.x - 2, player.y - 8, "white");
+
+      if (player.dannyFollowing && currentArea === "farm") {
+        drawDanny(player.x - 35, player.y + 8);
+      }
+    }
+
+    function drawDanny(x, y) {
+      drawPixelRect(x + 4, y, 18, 8, "#111");
+      drawPixelRect(x + 5, y + 8, 16, 10, "#f1c27d");
+      drawPixelRect(x, y + 18, 28, 16, "#2a9d8f");
+      drawPixelRect(x - 4, y + 20, 6, 20, "#f1c27d");
+      drawPixelRect(x + 26, y + 20, 6, 20, "#f1c27d");
+      drawPixelRect(x + 5, y + 34, 7, 12, "#333");
+      drawPixelRect(x + 16, y + 34, 7, 12, "#333");
+      drawText("Danny", x - 9, y - 7, "white");
+    }
+
+    function drawTruck(x, y) {
+      drawPixelRect(x, y + 15, 90, 32, "#b22222");
+      drawPixelRect(x + 20, y, 45, 25, "#c0392b");
+      drawPixelRect(x + 25, y + 5, 15, 12, "#9be7ff");
+      drawPixelRect(x + 45, y + 5, 15, 12, "#9be7ff");
+      drawPixelRect(x + 12, y + 42, 18, 18, "#111");
+      drawPixelRect(x + 62, y + 42, 18, 18, "#111");
+      drawText("F-150", x + 22, y + 37, "white");
+    }
+
+    function drawBoat(x, y) {
+      drawPixelRect(x, y + 20, 85, 20, "#ffffff");
+      drawPixelRect(x + 10, y + 5, 55, 20, "#d0f0ff");
+      drawPixelRect(x + 70, y + 27, 25, 10, "#555");
+      drawText("Boat", x + 22, y + 55, "white");
+    }
+
+    function drawText(text, x, y, color) {
+      ctx.fillStyle = color;
+      ctx.font = "14px monospace";
+      ctx.fillText(text, x, y);
+    }
+
+    function drawHUD() {
+      drawPixelRect(0, 0, 960, 48, "#0b1f3a");
+
+      for (let i = 0; i < player.maxHearts; i++) {
+        drawText(i < player.hearts ? "♥" : "♡", 20 + i * 25, 31, "#ff5a6e");
+      }
+
+      drawText(`Life Points: ${player.life}/100`, 130, 31, "white");
+      drawText(`Area: ${areas[currentArea].name}`, 330, 31, "white");
+      drawText(`Inventory: ${player.inventory.join(", ")}`, 610, 31, "white");
+    }
+
+    function drawMessage() {
+      if (messageTimer > 0 && mode === "explore") {
+        drawPixelRect(35, 520, 890, 50, "rgba(255,255,255,0.92)");
+        ctx.strokeStyle = "#0b1f3a";
+        ctx.lineWidth = 3;
+        ctx.strokeRect(35, 520, 890, 50);
+        drawText(message, 55, 550, "#0b1f3a");
+      }
+    }
+
+    function drawFight() {
+      ctx.fillStyle = "#222";
+      ctx.fillRect(0, 48, 960, 552);
+
+      drawText("BROTHER BATTLE: BEN VS DANNY", 340, 90, "white");
+      drawText("P = Punch | O = Block | K = Kick", 350, 120, "#4db8ff");
+
+      drawPixelRect(210, 410, 120, 90, "#c0392b");
+      drawText("BEN", 250, 390, "white");
+
+      drawPixelRect(640, 390, 150, 110, "#2a9d8f");
+      drawText("DANNY", 685, 370, "white");
+
+      drawPixelRect(160, 150, 260, 25, "#555");
+      drawPixelRect(160, 150, miniGame.playerHealth * 2.6, 25, "#ff5a6e");
+      drawText(`Ben Health: ${Math.max(0, Math.round(miniGame.playerHealth))}`, 180, 170, "white");
+
+      drawPixelRect(540, 150, 260, 25, "#555");
+      drawPixelRect(540, 150, miniGame.enemyHealth * 2.6, 25, "#4db8ff");
+      drawText(`Danny Health: ${Math.max(0, Math.round(miniGame.enemyHealth))}`, 560, 170, "white");
+
+      drawText(miniGame.note, 240, 540, "white");
+    }
+
+    function drawWorkMini() {
+      ctx.fillStyle = "#1b2735";
+      ctx.fillRect(0, 48, 960, 552);
+
+      drawText("WORK CHALLENGE", 410, 110, "white");
+      drawText("Tap SPACE quickly to finish the job.", 340, 145, "#4db8ff");
+
+      drawPixelRect(280, 270, 400, 35, "#555");
+      drawPixelRect(280, 270, miniGame.progress * 4, 35, "#4db8ff");
+
+      drawText(`Progress: ${Math.round(miniGame.progress)}%`, 410, 330, "white");
+      drawText(`Time Left: ${Math.ceil(miniGame.timer / 60)} seconds`, 390, 360, "white");
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      drawArea();
+      drawPlayer();
+      drawHUD();
+
+      if (mode === "fight") drawFight();
+      if (mode === "workMini") drawWorkMini();
+
+      drawMessage();
+    }
+
+    function gameLoop() {
+      update();
+      draw();
+      requestAnimationFrame(gameLoop);
+    }
+
+    gameLoop();
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Benjamin Fowler | Hobbies</title>
+
+  <style>
+    :root {
+      --navy: #0b1f3a;
+      --blue: #1769aa;
+      --light-blue: #e8f4ff;
+      --accent: #4db8ff;
+      --text: #1d2733;
+      --muted: #667085;
+      --card: #ffffff;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #eef7ff, #ffffff);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: rgba(11, 31, 58, 0.95);
+      padding: 16px 8%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 18px rgba(0,0,0,0.15);
+    }
+
+    nav h2 {
+      color: white;
+      letter-spacing: 1px;
+    }
+
+    nav a {
+      color: white;
+      text-decoration: none;
+      margin-left: 18px;
+      padding: 8px 12px;
+      border-radius: 20px;
+      transition: 0.25s ease;
+    }
+
+    nav a:hover {
+      background: var(--accent);
+      color: var(--navy);
+    }
+
+    .linkedin {
+      background: #0077b5;
+    }
+
+    .linkedin:hover {
+      background: #0095e6;
+      color: white;
+    }
+
+    .hero {
+      text-align: center;
+      padding: 75px 8% 40px;
+    }
+
+    .hero h1 {
+      font-size: 4rem;
+      color: var(--navy);
+      letter-spacing: 4px;
+      animation: fadeDown 0.9s ease forwards;
+    }
+
+    .hero p {
+      margin: 18px auto 0;
+      max-width: 700px;
+      color: var(--muted);
+      font-size: 1.1rem;
+    }
+
+    @keyframes fadeDown {
+      from {
+        opacity: 0;
+        transform: translateY(-25px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .hobby-grid {
+      padding: 35px 8% 70px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 25px;
+    }
+
+    .hobby-card {
+      background: var(--card);
+      border-radius: 22px;
+      overflow: hidden;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      cursor: pointer;
+      transition: 0.25s ease;
+      border: 1px solid #e6edf5;
+    }
+
+    .hobby-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 18px 38px rgba(23, 105, 170, 0.22);
+    }
+
+    .hobby-card img {
+      width: 100%;
+      height: 190px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .hobby-content {
+      padding: 22px;
+    }
+
+    .hobby-content h2 {
+      color: var(--blue);
+      margin-bottom: 8px;
+    }
+
+    .hint {
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .fact {
+      max-height: 0;
+      overflow: hidden;
+      opacity: 0;
+      transition: 0.35s ease;
+      margin-top: 0;
+      color: var(--text);
+    }
+
+    .hobby-card.active .fact {
+      max-height: 180px;
+      opacity: 1;
+      margin-top: 14px;
+    }
+
+    .hobby-card.active .hint {
+      color: var(--blue);
+      font-weight: bold;
+    }
+
+    footer {
+      text-align: center;
+      padding: 28px;
+      background: var(--navy);
+      color: white;
+    }
+
+    @media (max-width: 800px) {
+      nav {
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      nav a {
+        margin: 4px;
+      }
+
+      .hero h1 {
+        font-size: 2.8rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <nav>
+    <h2>Benjamin Fowler</h2>
+    <div>
+      <a href="resume.html">Resume</a>
+      <a href="hobbies.html">Hobbies</a>
+      <a href="game.html">Game</a>
+      <a href="https://www.linkedin.com/in/benjamin-fowler-838241249/"
+         target="_blank"
+         rel="noopener noreferrer"
+         class="linkedin">LinkedIn</a>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <h1>HOBBIES</h1>
+    <p>
+      Work matters, but so does having a life outside of work. Click around below
+      to explore some of the hobbies, stories, and interests that make me who I am.
+    </p>
+  </section>
+
+  <section class="hobby-grid">
+
+    <div class="hobby-card">
+      <img src="https://images.unsplash.com/photo-1564419434661-10fbfbc5e7de?auto=format&fit=crop&w=900&q=80" alt="Dirtbike riding">
+      <div class="hobby-content">
+        <h2>Dirtbiking</h2>
+        <p class="hint">Click to reveal</p>
+        <p class="fact">
+          My preferred brand of dirtbike is KTM. I recently went to Hawaii to support my dad while he raced there.
+        </p>
+      </div>
+    </div>
+
+    <div class="hobby-card">
+      <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=900&q=80" alt="Boating on water">
+      <div class="hobby-content">
+        <h2>Boating</h2>
+        <p class="hint">Click to reveal</p>
+        <p class="fact">
+          My parents let me take their 1997 Maxum boat to Utah, where we spent weekends at Strawberry Reservoir.
+        </p>
+      </div>
+    </div>
+
+    <div class="hobby-card">
+      <img src="https://images.unsplash.com/photo-1544191696-15693072e0b5?auto=format&fit=crop&w=900&q=80" alt="Mountain biking trail">
+      <div class="hobby-content">
+        <h2>Mountain Biking</h2>
+        <p class="hint">Click to reveal</p>
+        <p class="fact">
+          I once had to take my friend to the hospital because he broke his face on one of our rides.
+        </p>
+      </div>
+    </div>
+
+    <div class="hobby-card">
+      <img src="https://images.unsplash.com/photo-1519682337058-a94d519337bc?auto=format&fit=crop&w=900&q=80" alt="Books and writing">
+      <div class="hobby-content">
+        <h2>Reading & Writing</h2>
+        <p class="hint">Click to reveal</p>
+        <p class="fact">
+          I enjoy almost every genre. The Lord of the Rings is my favorite series.
+        </p>
+      </div>
+    </div>
+
+    <div class="hobby-card">
+      <img src="https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=900&q=80" alt="Movie theater">
+      <div class="hobby-content">
+        <h2>Film</h2>
+        <p class="hint">Click to reveal</p>
+        <p class="fact">
+          Lord of the Rings comes first here, too. I love movies that feel epic, creative, and memorable.
+        </p>
+      </div>
+    </div>
+
+    <div class="hobby-card">
+      <img src="https://images.unsplash.com/photo-1587654780291-39c9404d746b?auto=format&fit=crop&w=900&q=80" alt="Lego bricks">
+      <div class="hobby-content">
+        <h2>Legos</h2>
+        <p class="hint">Click to reveal</p>
+        <p class="fact">
+          Yet again, The Lord of the Rings takes the cake. I collect Lego sets with that theme.
+        </p>
+      </div>
+    </div>
+
+  </section>
+
+  <footer>
+    <p>© 2026 Benjamin Fowler | Hobbies Page</p>
+  </footer>
+
+  <script>
+    const cards = document.querySelectorAll(".hobby-card");
+
+    cards.forEach(card => {
+      card.addEventListener("click", () => {
+        card.classList.toggle("active");
+      });
+    });
+  </script>
+
+</body>
+</html>
